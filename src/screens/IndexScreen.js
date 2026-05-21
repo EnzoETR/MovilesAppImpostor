@@ -1,23 +1,10 @@
-import {View,StyleSheet} from 'react-native';
+import {Text, View} from 'react-native';
+import { styles } from '../styles/EstilosIndex';
 
 export default function IndexScreen(){
-
-
-
     return (
-
         <View style={styles.container}>
-
+            <Text style={styles.text}>Hola Mundo</Text>
         </View>
-
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#0aadad',
-        alignItems: 'center',  
-        justifyContent: 'center',
-    },
-});
