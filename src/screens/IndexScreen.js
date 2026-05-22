@@ -1,10 +1,21 @@
 import {Text, View} from 'react-native';
 import { styles } from '../styles/EstilosIndex';
+import FichaEstadistica from '../components/ficha_estadistica';
+import BotonInicio from '../components/boton_inicio';
 
 export default function IndexScreen(){
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Hola Mundo</Text>
+            <View style={styles.contenedorFichasEstadisticas}>
+                <FichaEstadistica/>
+                <FichaEstadistica/>
+                <FichaEstadistica/>
+            </View>
+            <View style={styles.contenedorBotonesIncio}>
+                <BotonInicio />
+                <BotonInicio />
+                <BotonInicio />
+            </View>
         </View>
     );
 }
