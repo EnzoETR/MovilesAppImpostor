@@ -3,7 +3,7 @@ import { styles } from '../styles/EstilosIndex';
 import FichaEstadistica from '../components/ficha_estadistica';
 import BotonInicio from '../components/boton_inicio';
 
-export default function IndexScreen(){
+export default function IndexScreen({ navigation }){
     return (
         <View style={styles.container}>
             <View style={styles.contenedorFichasEstadisticas}>
@@ -12,7 +12,10 @@ export default function IndexScreen(){
                 <FichaEstadistica/>
             </View>
             <View style={styles.contenedorBotonesIncio}>
-                <BotonInicio />
+                <BotonInicio 
+                title="Crear Partida"
+                onPress={() => navigation.navigate("ConfigurarPartida")}
+                />
                 <BotonInicio />
                 <BotonInicio />
             </View>
