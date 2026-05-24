@@ -29,8 +29,9 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
   image: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
     marginRight: 10,
     marginTop: 8,
   },
