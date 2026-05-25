@@ -30,4 +30,4 @@ export default function IndexScreen({ navigation }){
             </View>
         </View>
     );
-}
+} //holahola
