@@ -18,16 +18,25 @@ export default function IndexScreen({ navigation }){
                 <FichaEstadistica titulo="IMPOSTOR" valor="5" imagen="impostor.png"/>
             </View>
             <View style={styles.contenedorBotonesIncio}>
-                <BotonInicio 
-                title="Crear Partida"
-                onPress={() => navigation.navigate("ConfigurarPartida")}
+                {/* Botón 1: Crear Partida */}
+                <BotonInicio
+                  title="Crear Partida"
+                  onPress={() => navigation.navigate("ConfigurarPartida")}
                 />
-                <BotonInicio />
-                <BotonInicio />
+                {/* Botón 2: Categorías y Reglas */}
+                <BotonInicio
+                  title="Categorías y Reglas"
+                  onPress={() => console.log("Abriendo Categorías y Reglas")}
+                />
+                {/* Botón 3: Iniciar Sesion */}
+                <BotonInicio
+                  title="Iniciar Sesión"
+                  onPress={() => navigation.navigate("IniciarSesion")}
+                />
             </View>
             <View style={styles.contenedorFooter}>
                 <Footer />
             </View>
         </View>
     );
-} //holahola
+}
