@@ -43,7 +43,6 @@ export default function IniciarSesionScreen({ navigation }) {
 
         {/* Tarjeta de Formulario Dinámica */}
         <View style={styles.formCard}>
-          <Text style={styles.helperText}>Dependiendo que apreta</Text>
 
           {/* Campo Nombre (Se muestra en AMBOS modos) */}
           <Text style={styles.inputLabel}>Nombre</Text>
