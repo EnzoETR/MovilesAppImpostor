@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
 
@@ -118,11 +118,48 @@ export default function IniciarSesionScreen({ navigation }) {
               style={styles.secondaryButton}
               onPress={() => {
                 if (!esRegistro) {
-                  // Acción de Iniciar Sesión: te manda al Index (Inicio)
+                  // === LÓGICA PARA INICIAR SESIÓN ===
+                  if (!nombre.trim() || !contrasenia.trim()) {
+                    alert("Por favor, ingresa tu nombre y contraseña para continuar.");
+                    return;
+                  }
+
+                  // Si los campos tienen texto, lo dejamos pasar al Index
+                  alert(`¡Bienvenido de nuevo, ${nombre.toUpperCase()}!`);
                   navigation.navigate("Inicio");
+
                 } else {
-                  // Acción de Registro (puedes agregar lógica aquí más adelante)
-                  console.log("Registrando usuario...");
+                  // === LÓGICA PARA REGISTRARME ===
+
+                  // 1. Validar campos vacíos
+                  if (!nombre.trim() || !correo.trim() || !contrasenia.trim() || !repetirContrasenia.trim()) {
+                    alert("Todos los campos son obligatorios para registrarte.");
+                    return;
+                  }
+
+                  // 2. Validar formato básico de email
+                  if (!correo.includes("@") || !correo.includes(".")) {
+                    alert("Por favor, introduce un correo electrónico válido.");
+                    return;
+                  }
+
+                  // 3. Validar que las contraseñas coincidan
+                  if (contrasenia !== repetirContrasenia) {
+                    alert("Las contraseñas no coinciden. Verifícalas.");
+                    return;
+                  }
+
+                  // 4. Éxito en el Registro
+                  alert(`¡Cuenta creada con éxito!\nBienvenido/a ${nombre}.`);
+
+                  // Limpiamos los campos
+                  setNombre('');
+                  setCorreo('');
+                  setContrasenia('');
+                  setRepetirContrasenia('');
+
+                  // Lo movemos automáticamente a la pestaña de login
+                  setEsRegistro(false);
                 }
               }}
             >
