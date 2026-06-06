@@ -105,4 +105,36 @@ footerText: {
     fontWeight: 'bold',
     marginRight: 6,
 },
+
+
+controlesImpostores: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+},
+
+numeroImpostores: {
+    color: '#ffffff',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginHorizontal: 20,
+},
+
+
+controlesImpostores: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+},
+controlesPista: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    transform: [{ scale: 1.5 }], 
+},
+
+
 });
