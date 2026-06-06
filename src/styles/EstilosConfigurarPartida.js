@@ -4,8 +4,11 @@ export const styles = StyleSheet.create({
   container: {
     backgroundColor: '#087c4f',
     flex: 1,
+  },
+  containerScroll: {
     padding: 18,
-},
+    paddingBottom: 32,
+  },
 
 header: {
     alignItems: 'center',
@@ -69,24 +72,52 @@ dropdownText: {
 cardJugadores: {
     backgroundColor: '#075c35',
     borderRadius: 14,
-    padding: 10,
+    padding: 14,
+    marginBottom: 10,
+    minHeight: 300,
+},
+listaJugadores: {
+    alignItems: 'center',
+    width: '100%',
+},
+
+jugadoresScrollContainer: {
+    width: '100%',
+    height: 220,
+    marginBottom: 14,
+},
+jugadoresScroll: {
+    width: '100%',
+    height: '100%',
+},
+jugadoresScrollContent: {
+    paddingBottom: 8,
+},
+
+inputJugador: {
+    backgroundColor: '#f5f5f5',
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
+    width: '100%',
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#c2c2c2',
     marginBottom: 10,
 },
 
-listaJugadores: {
-    alignItems: 'center',
+botonesJugadores: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 10,
 },
 
-itemJugador: {
-    backgroundColor: '#a8e6bd',
-    color: '#000000',
-    fontSize: 17,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    width: 220,
-    padding: 5,
-    borderRadius: 5,
-    marginBottom: 7,
+botonJugador: {
+    flex: 1,
+    borderRadius: 10,
+    overflow: 'hidden',
 },
 
 botonesFinales: {
@@ -121,13 +152,6 @@ numeroImpostores: {
     marginHorizontal: 20,
 },
 
-
-controlesImpostores: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-},
 controlesPista: {
     flexDirection: 'row',
     alignItems: 'center',
