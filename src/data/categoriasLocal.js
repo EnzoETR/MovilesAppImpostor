@@ -2,7 +2,7 @@ export const categorias = [
     {
     id : 1,
     nombre : "Peliculas",
-    peliculas : [
+    palabras : [
         {
             palabra: "Avatar",
             pistas: ["Azul", "Tribu", "Conexión"]

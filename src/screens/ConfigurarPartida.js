@@ -8,20 +8,15 @@ import Checkbox from 'expo-checkbox';
 
 
 import { categorias } from '../data/categoriasLocal';
+import { getJugadoresGuardados, setJugadoresGuardados } from '../utils/jugadoresStore';
 
-export default function ConfigurarPartidaScreen() {
+export default function ConfigurarPartidaScreen({ navigation }) {
 
+
+    const [palabra, setPalabra] = useState('');
     const [open, setOpen] = useState(false);
-
+    
     const [value, setValue] = useState(null);
-
-    /*const [items, setItems] = useState([
-        { label: 'Famosos', value: 'famosos' },
-        { label: 'Películas', value: 'peliculas' },
-        { label: 'Videojuegos', value: 'videojuegos' },
-        { label: 'Fútbol', value: 'futbol' },
-        { label: 'Futbolistas', value: 'futbolistas' }
-    ]);*/
 
     const [items, setItems] = useState(
         categorias.map((categoria) => ({
@@ -29,19 +24,68 @@ export default function ConfigurarPartidaScreen() {
             value: categoria.id,
         }))
     );
-    const categoriaSeleccionada = categorias.find(
-        (categoria) => categoria.id === value
-    );
 
     const [impostores, setImpostores] = useState(1);
     
     const [pista,setPista] = useState(false);
 
-    const [jugadores, setJugadores] = useState([
-        { id: '1', nombre: 'Juan' },
-        { id: '2', nombre: 'Pedro' },
-    ]);
+    const [jugadores, setJugadores] = useState(getJugadoresGuardados());
 
+
+    const iniciarPartida = () => {
+        // Validaciones
+        if (!value) {
+            alert('Selecciona una categoría antes de iniciar.');
+            return;
+        }
+        if (jugadores.length < 3) {
+            alert('Se necesitan al menos 3 jugadores para jugar.');
+            return;
+        }
+        if (impostores >= jugadores.length) {
+            alert('La cantidad de impostores debe ser menor que la cantidad de jugadores.');
+            return;
+        }
+
+        // Buscar categoría y elegir palabra aleatoria
+        const categoriaSeleccionada = categorias.find((c) => c.id === value);
+        if (!categoriaSeleccionada || !categoriaSeleccionada.palabras?.length) {
+            alert('La categoría seleccionada no tiene palabras.');
+            return;
+        }
+        const palabraAleatoria = categoriaSeleccionada.palabras[
+            Math.floor(Math.random() * categoriaSeleccionada.palabras.length)
+        ];
+
+        // Crear índices aleatorios para los impostores
+        const indices = jugadores.map((_, i) => i);
+        // Mezclar (shuffle) los índices
+        for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        const indicesImpostores = new Set(indices.slice(0, impostores));
+
+        // Asignar roles
+        const jugadoresConRol = jugadores.map((jugador, index) => ({
+            ...jugador,
+            rol: indicesImpostores.has(index) ? 'IMPOSTOR' : palabraAleatoria.palabra,
+            esImpostor: indicesImpostores.has(index),
+            pista: palabraAleatoria.pistas?.length
+                ? palabraAleatoria.pistas[Math.floor(Math.random() * palabraAleatoria.pistas.length)]
+                : '',
+        }));
+
+        // Guardar la lista de jugadores (sin roles) para la próxima partida
+        setJugadoresGuardados(jugadores.map((j) => ({ id: j.id, nombre: j.nombre })));
+
+        navigation.navigate('RevelarRoles', {
+            jugadores: jugadoresConRol,
+            palabra: palabraAleatoria.palabra,
+            categoria: categoriaSeleccionada.nombre,
+            mostrarPista: pista,
+        });
+    };
 
     return (
         <FlatList
@@ -144,8 +188,9 @@ export default function ConfigurarPartidaScreen() {
                 </View>
             </View>
                     <View style={styles.botonesFinales}>
-                <Button title='Volver' onPress={() => console.log('Volver')} />
-                <Button title='Iniciar Partida' onPress={() => console.log('Iniciar Partida')} />
+                <Button title='Volver' onPress={() => navigation.goBack()} />
+                    
+                <Button title='Iniciar Partida' onPress={iniciarPartida} />
             </View>
 
                     <View style={styles.footer}>
