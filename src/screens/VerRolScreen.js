@@ -8,7 +8,7 @@ export default function VerRolScreen({ route, navigation }) {
     const esImpostor = jugador?.esImpostor;
 
     const volver = () => {
-        // Vuelve atrás — RevelarRoles detecta el regreso con useFocusEffect
+        
         navigation.goBack();
     };
 
@@ -30,7 +30,7 @@ export default function VerRolScreen({ route, navigation }) {
                         </Text>
                         {esImpostor && (
                             <Text style={estilos.mensajeImpostor}>
-                                ¡Eres el impostor! Finge que conoces la palabra.
+                                ¡Eres el impostor!
                             </Text>
                         )}
                         {!esImpostor && mostrarPista && jugador.pista && (
@@ -54,7 +54,7 @@ export default function VerRolScreen({ route, navigation }) {
 
             {revelado && (
                 <TouchableOpacity style={estilos.botonVolver} onPress={volver}>
-                    <Text style={estilos.botonVolverTexto}>Listo, continuar</Text>
+                    <Text style={estilos.botonVolverTexto}>Listo</Text>
                 </TouchableOpacity>
             )}
         </View>

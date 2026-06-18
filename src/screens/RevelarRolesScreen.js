@@ -66,12 +66,6 @@ export default function RevelarRolesScreen({ route, navigation }) {
                     ))}
                 </View>
 
-                <Text style={estilos.nota}>
-                    ¡A jugar! La votación se hace en la vida real.
-                </Text>
-                <Text style={estilos.nota}>
-                    Cuando terminen, creen una nueva partida.
-                </Text>
 
                 <TouchableOpacity
                     style={estilos.botonPrimario}
@@ -114,7 +108,7 @@ export default function RevelarRolesScreen({ route, navigation }) {
                         >
                             <Text style={estilos.jugadorNombre}>{item.nombre}</Text>
                             <Text style={estilos.estado}>
-                                {yaVio ? '✅ Visto' : '👁️ Toca para ver'}
+                                {yaVio ? ' Visto' : 'Toca para ver'}
                             </Text>
                         </TouchableOpacity>
                     );
@@ -229,7 +223,7 @@ const estilos = StyleSheet.create({
         color: '#a8e6bd',
         fontSize: 14,
     },
-    // ── Estilos para la pantalla de revelación ──────────────────────────────
+
     cardRevelar: {
         backgroundColor: '#075c35',
         borderRadius: 16,
