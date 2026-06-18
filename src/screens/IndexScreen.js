@@ -5,7 +5,7 @@ import BotonInicio from '../components/boton_inicio';
 import Footer from '../components/footer';
 import ImagenPrinicipal from '../../assets/imagenes/ImpostorImagenPrincipal.png';
 
-export default function IndexScreen({ navigation }){
+export default function IndexScreen({ navigation , route}) {
     return (
         <View style={styles.container}>
             <Image 
