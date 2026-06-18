@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
+import { supabase } from '../utils/supabase';
 
 export default function IniciarSesionScreen({ navigation }) {
   // Este estado controla si estamos en modo Registro (true) o Inicio de Sesión (false)
@@ -12,6 +13,61 @@ export default function IniciarSesionScreen({ navigation }) {
   const [correo, setCorreo] = useState('');
   const [contrasenia, setContrasenia] = useState('');
   const [repetirContrasenia, setRepetirContrasenia] = useState('');
+  const handleRegistro = async () => {
+  if (!nombre.trim() || !correo.trim() || !contrasenia.trim() || !repetirContrasenia.trim()) {
+    alert("Todos los campos son obligatorios.");
+    return;
+  }
+  if (!correo.includes("@") || !correo.includes(".")) {
+    alert("Por favor, introducí un correo electrónico válido.");
+    return;
+  }
+  if (contrasenia !== repetirContrasenia) {
+    alert("Las contraseñas no coinciden.");
+    return;
+  }
+
+  // Inserta en la tabla "usuarios"
+  const { data, error } = await supabase
+    .from('usuarios')
+    .insert([{ 
+      nombre: nombre.trim(), 
+      correo: correo.trim(), 
+      password: contrasenia.trim() 
+    }]);
+
+  if (error) {
+    alert("Error al registrarse: " + error.message);
+    return;
+  }
+
+  alert(`¡Cuenta creada con éxito! Bienvenido/a ${nombre}.`);
+  setNombre(''); setCorreo(''); setContrasenia(''); setRepetirContrasenia('');
+  setEsRegistro(false);
+};
+
+const handleIniciarSesion = async () => {
+  if (!nombre.trim() || !contrasenia.trim()) {
+    alert("Por favor, ingresa tu nombre y contraseña.");
+    return;
+  }
+
+  // Busca en la tabla "usuarios"
+  const { data, error } = await supabase
+    .from('usuarios')
+    .select('*')
+    .eq('nombre', nombre.trim())
+    .eq('password', contrasenia.trim())
+    .single();
+
+  if (error || !data) {
+    alert("Usuario o contraseña incorrectos.");
+    return;
+  }
+
+  alert(`¡Bienvenido de nuevo, ${data.nombre}!`);
+  navigation.navigate("Inicio");
+};
 
   return (
     <KeyboardAvoidingView
@@ -116,52 +172,7 @@ export default function IniciarSesionScreen({ navigation }) {
 
             <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={() => {
-                if (!esRegistro) {
-                  // === LÓGICA PARA INICIAR SESIÓN ===
-                  if (!nombre.trim() || !contrasenia.trim()) {
-                    alert("Por favor, ingresa tu nombre y contraseña para continuar.");
-                    return;
-                  }
-
-                  // Si los campos tienen texto, lo dejamos pasar al Index
-                  alert(`¡Bienvenido de nuevo, ${nombre.toUpperCase()}!`);
-                  navigation.navigate("Inicio");
-
-                } else {
-                  // === LÓGICA PARA REGISTRARME ===
-
-                  // 1. Validar campos vacíos
-                  if (!nombre.trim() || !correo.trim() || !contrasenia.trim() || !repetirContrasenia.trim()) {
-                    alert("Todos los campos son obligatorios para registrarte.");
-                    return;
-                  }
-
-                  // 2. Validar formato básico de email
-                  if (!correo.includes("@") || !correo.includes(".")) {
-                    alert("Por favor, introduce un correo electrónico válido.");
-                    return;
-                  }
-
-                  // 3. Validar que las contraseñas coincidan
-                  if (contrasenia !== repetirContrasenia) {
-                    alert("Las contraseñas no coinciden. Verifícalas.");
-                    return;
-                  }
-
-                  // 4. Éxito en el Registro
-                  alert(`¡Cuenta creada con éxito!\nBienvenido/a ${nombre}.`);
-
-                  // Limpiamos los campos
-                  setNombre('');
-                  setCorreo('');
-                  setContrasenia('');
-                  setRepetirContrasenia('');
-
-                  // Lo movemos automáticamente a la pestaña de login
-                  setEsRegistro(false);
-                }
-              }}
+              onPress={esRegistro ? handleRegistro : handleIniciarSesion}
             >
               <Text style={styles.secondaryButtonText}>
                 {esRegistro ? 'CREAR CUENTA' : 'INICIAR SESION'}
