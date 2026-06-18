@@ -66,7 +66,7 @@ const handleIniciarSesion = async () => {
   }
 
   alert(`¡Bienvenido de nuevo, ${data.nombre}!`);
-  navigation.navigate("Inicio");
+  navigation.navigate("Inicio", { usuario: data });
 };
 
   return (

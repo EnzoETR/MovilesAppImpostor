@@ -5,7 +5,8 @@ import BotonInicio from '../components/boton_inicio';
 import Footer from '../components/footer';
 import ImagenPrinicipal from '../../assets/imagenes/ImpostorImagenPrincipal.png';
 
-export default function IndexScreen({ navigation }){
+export default function IndexScreen({ navigation, route }){
+    const usuario = route.params?.usuario || null; // null = no inició sesión
     return (
         <View style={styles.container}>
             <Image 
@@ -26,7 +27,7 @@ export default function IndexScreen({ navigation }){
                 {/* Botón 2: Categorías y Reglas */}
                 <BotonInicio
                   title="Categorías y Reglas"
-                  onPress={() => console.log("Abriendo Categorías y Reglas")}
+                   onPress={() => navigation.navigate("Categorias", { usuario })}
                 />
                 {/* Botón 3: Iniciar Sesion */}
                 <BotonInicio

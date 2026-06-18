@@ -4,6 +4,7 @@ import ConfiguracionScreen from '../screens/ConfigurarPartida';
 import IniciarSesionScreen from '../screens/IniciarSesionScreen'; 
 import RevelarRolesScreen from '../screens/RevelarRolesScreen';
 import VerRolScreen from '../screens/VerRolScreen';
+import CategoriasScreen from '../screens/CategoriasScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavegador() {
@@ -14,6 +15,7 @@ export default function AppNavegador() {
       <Stack.Screen name="IniciarSesion" component={IniciarSesionScreen} />
       <Stack.Screen name="RevelarRoles" component={RevelarRolesScreen} />
       <Stack.Screen name="VerRol" component={VerRolScreen} />
+      <Stack.Screen name="Categorias" component={CategoriasScreen} />
     </Stack.Navigator>    
   );
 }
