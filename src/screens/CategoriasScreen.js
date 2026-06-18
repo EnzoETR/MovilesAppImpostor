@@ -20,12 +20,13 @@ export default function CategoriasScreen({ navigation, route }) {
   const estaLogueado = usuario !== null;
 
   const CATEGORIAS = [
-    { id: 1, nombre: 'Famosos', disponible: estaLogueado },
-    { id: 2, nombre: 'Películas', disponible: true },
-    { id: 3, nombre: 'Videojuegos', disponible: estaLogueado },
-    { id: 4, nombre: 'Fútbol', disponible: estaLogueado },
-    { id: 5, nombre: 'Futbolistas', disponible: estaLogueado },
-  ];
+  { id: 1, nombre: 'Videojuegos', disponible: estaLogueado },
+  { id: 2, nombre: 'Países', disponible: estaLogueado },
+  { id: 3, nombre: 'Comida', disponible: estaLogueado },
+  { id: 4, nombre: 'Cuadros', disponible: estaLogueado },
+  { id: 5, nombre: 'Músicos', disponible: estaLogueado },
+  { id: 6, nombre: 'Películas', disponible: true }, // única disponible sin login
+];
 
   const handleCategoria = (categoria) => {
     if (!categoria.disponible) {
