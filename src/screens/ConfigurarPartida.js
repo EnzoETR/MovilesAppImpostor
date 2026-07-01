@@ -14,8 +14,8 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
     const estaLogueado = usuario !== null;
 
     const API_URLS = [
-        'http://192.168.1.137:8088/api/v1',
-        'http://172.20.10.2:8088/api/v1',
+        'http://192.168.1.15:8088/api/v1',
+        'http://192.168.10.16:8088/api/v1',
         'http://localhost:8088/api/v1',
         'http://10.0.2.2:8088/api/v1',
     ];

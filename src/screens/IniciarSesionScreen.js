@@ -2,11 +2,54 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Button } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
-import { supabase } from '../utils/supabase'; // Asegúrate de importar Supabase correctamente
 
 export default function IniciarSesionScreen({ navigation, route }) {
   
   const usuarioActivo = route.params?.usuario || null;
+
+  const API_URLS = [
+    'http://192.168.1.15:8088/api/v1',
+    'http://192.168.10.16:8088/api/v1',
+    'http://localhost:8088/api/v1',
+    'http://10.0.2.2:8088/api/v1',
+  ];
+
+  const fetchConFallback = async (ruta, method = 'GET', body = null) => {
+    let ultimoError = null;
+
+    for (const API_URL of API_URLS) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const options = {
+          method: method,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(`${API_URL}${ruta}`, options);
+        
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          return response;
+        }
+
+        ultimoError = new Error(`HTTP ${response.status}`);
+      } catch (error) {
+        ultimoError = error;
+      }
+    }
+
+    throw ultimoError || new Error('No se pudo conectar con el servidor');
+  };
 
   // Estados para el formulario
   const [esRegistro, setEsRegistro] = useState(false);
@@ -30,46 +73,41 @@ export default function IniciarSesionScreen({ navigation, route }) {
       return;
     }
 
-    const { data, error } = await supabase
-      .from('usuarios')
-      .insert([{ 
-        nombre: nombre.trim(), 
-        correo: correo.trim(), 
-        password: contrasenia.trim() 
-      }]);
+    try {
+      const response = await fetchConFallback('/usuario/crearUsuario', 'POST', {
+        nombre: nombre.trim(),
+        correo: correo.trim(),
+        password: contrasenia.trim()
+      });
 
-    if (error) {
+      const data = await response.json();
+      alert(`¡Cuenta creada con éxito!\nBienvenido/a ${nombre}.`);
+      setNombre(''); setCorreo(''); setContrasenia(''); setRepetirContrasenia('');
+      setEsRegistro(false);
+    } catch (error) {
       alert("Error al registrarse: " + error.message);
-      return;
     }
-
-    alert(`¡Cuenta creada con éxito!\nBienvenido/a ${nombre}.`);
-    setNombre(''); setCorreo(''); setContrasenia(''); setRepetirContrasenia('');
-    setEsRegistro(false);
   };
 
   // === LÓGICA PARA INICIAR SESIÓN ===
   const handleIniciarSesion = async () => {
-    if (!nombre.trim() || !contrasenia.trim()) {
-      alert("Por favor, ingresa tu nombre y contraseña para continuar.");
+    if (!correo.trim() || !contrasenia.trim()) {
+      alert("Por favor, ingresa tu correo y contraseña para continuar.");
       return;
     }
 
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .eq('nombre', nombre.trim())
-      .eq('password', contrasenia.trim())
-      .single();
+    try {
+      const response = await fetchConFallback('/usuario/login', 'POST', {
+        correo: correo.trim(),
+        password: contrasenia.trim()
+      });
 
-    if (error || !data) {
+      const data = await response.json();
+      alert(`¡Bienvenido de nuevo, ${data.nombre.toUpperCase()}!`);
+      navigation.navigate("Inicio", { usuario: data });
+    } catch (error) {
       alert("Usuario o contraseña incorrectos.");
-      return;
     }
-
-    alert(`¡Bienvenido de nuevo, ${data.nombre.toUpperCase()}!`);
-    // Enviamos el usuario de vuelta a la pantalla de Inicio
-    navigation.navigate("Inicio", { usuario: data });
   };
 
   // === EN CASO DE QUE YA ESTÉ LOGUEADO ===
@@ -141,14 +179,15 @@ export default function IniciarSesionScreen({ navigation, route }) {
         <View style={styles.formCard}>
 
           {/* Campo Nombre */}
-          <Text style={styles.inputLabel}>Nombre</Text>
+          <Text style={styles.inputLabel}>{esRegistro ? 'Nombre' : 'Correo'}</Text>
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              value={nombre}
-              onChangeText={setNombre}
-              placeholder="Ingresa tu nombre"
+              value={esRegistro ? nombre : correo}
+              onChangeText={esRegistro ? setNombre : setCorreo}
+              placeholder={esRegistro ? "Ingresa tu nombre" : "Ingresa tu correo"}
               placeholderTextColor="#4E7A43"
+              keyboardType={esRegistro ? "default" : "email-address"}
             />
           </View>
 
