@@ -44,11 +44,11 @@ export default function PartidaScreen({ route, navigation }) {
     };
 
     const siguienteRonda = () => {
-        navigation.navigate('ConfigurarPartida');
+        navigation.navigate('ConfigurarPartida', route.params);
     };
 
     const volverAlInicio = () => {
-        navigation.popToTop();
+        navigation.navigate('ConfigurarPartida', route.params);
     };
 
     // ─── PANTALLA DE VOTACIÓN ───────────────────────────────────────────────

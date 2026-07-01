@@ -220,6 +220,22 @@ export default function IniciarSesionScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity
+            style={{
+              alignSelf: 'flex-start',
+              marginTop: 14,
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 10,
+              backgroundColor: '#eaf7ee',
+              borderWidth: 1,
+              borderColor: '#06a837',
+            }}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={{ color: '#0f6b31', fontWeight: '700' }}>← Volver</Text>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
 

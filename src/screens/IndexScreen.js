@@ -4,10 +4,18 @@ import FichaEstadistica from '../components/ficha_estadistica';
 import BotonInicio from '../components/boton_inicio';
 import Footer from '../components/footer';
 import ImagenPrinicipal from '../../assets/imagenes/ImpostorImagenPrincipal.png';
-import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
 
-export default function IndexScreen({ navigation }) {
-    const { usuario } = useAuth();
+export default function IndexScreen({ navigation, route }) {
+    // Estado local para mantener al usuario sincronizado
+    const [usuario, setUsuario] = useState(route.params?.usuario || null);
+
+    // Este efecto escucha cada vez que la pantalla vuelve a estar en primer plano (focus)
+    useEffect(() => {
+        if (route.params?.usuario !== undefined) {
+            setUsuario(route.params.usuario);
+        }
+    }, [route.params?.usuario]);
 
     return (
         <View style={styles.container}>

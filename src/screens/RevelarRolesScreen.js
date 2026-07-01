@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function RevelarRolesScreen({ route, navigation }) {
-    const { jugadores = [], palabra, categoria, mostrarPista } = route.params || {};
+    const { jugadores = [], palabra, categoria, mostrarPista, votacion } = route.params || {};
 
     const [vistos, setVistos] = useState([]);
 
@@ -69,16 +69,16 @@ export default function RevelarRolesScreen({ route, navigation }) {
 
                 <TouchableOpacity
                     style={estilos.botonPrimario}
-                    onPress={() => navigation.popToTop()}
+                    onPress={() => navigation.navigate('ConfigurarPartida', route.params)}
                 >
-                    <Text style={estilos.botonPrimarioTexto}>Volver al Inicio</Text>
+                    <Text style={estilos.botonPrimarioTexto}>Volver a configurar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={estilos.botonSecundario}
-                    onPress={() => setRevelarTodo(false)}
+                    onPress={() => navigation.navigate('Inicio', { usuario: route.params?.usuario || null })}
                 >
-                    <Text style={estilos.botonSecundarioTexto}>Volver a ver roles</Text>
+                    <Text style={estilos.botonSecundarioTexto}>Volver al inicio</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -116,12 +116,27 @@ export default function RevelarRolesScreen({ route, navigation }) {
             />
 
             {todosVieron && (
-                <TouchableOpacity
-                    style={estilos.botonPrimario}
-                    onPress={() => setRevelarTodo(true)}
-                >
-                    <Text style={estilos.botonPrimarioTexto}>Ver palabra e impostor</Text>
-                </TouchableOpacity>
+                <>
+                    {votacion ? (
+                        <TouchableOpacity
+                            style={estilos.botonPrimario}
+                            onPress={() => navigation.navigate('Votacion', {
+                                jugadores,
+                                palabra,
+                                categoria,
+                            })}
+                        >
+                            <Text style={estilos.botonPrimarioTexto}>Ir a Votación</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity
+                            style={estilos.botonPrimario}
+                            onPress={() => setRevelarTodo(true)}
+                        >
+                            <Text style={estilos.botonPrimarioTexto}>Ver palabra e impostor</Text>
+                        </TouchableOpacity>
+                    )}
+                </>
             )}
 
             <TouchableOpacity

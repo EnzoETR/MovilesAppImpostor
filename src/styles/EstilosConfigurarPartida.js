@@ -24,22 +24,28 @@ titulo: {
 
 opciones: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 10,
 },
 
 cardOpcion: {
     backgroundColor: '#075c35',
-    width: '48%',
+    width: '31%',
+    minWidth: 95,
     borderRadius: 14,
     padding: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 110,
+    marginBottom: 8,
 },
 
 textOpcion: {
     color: '#ffffff',
     fontWeight: 'bold',
     textTransform: 'uppercase',
+    fontSize: 12,
 },
 
 cardCategorias: {
@@ -123,6 +129,23 @@ botonJugador: {
 botonesFinales: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 12,
+},
+
+botonFinal: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#06a837',
+},
+
+botonFinalSecundario: {
+    flex: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#d9534f',
 },
 
 footer: {
@@ -141,23 +164,26 @@ footerText: {
 controlesImpostores: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginTop: 10,
+    gap: 10,
+    width: '100%',
 },
 
 numeroImpostores: {
     color: '#ffffff',
     fontSize: 22,
     fontWeight: 'bold',
-    marginHorizontal: 20,
+    minWidth: 28,
+    textAlign: 'center',
 },
 
 controlesPista: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    transform: [{ scale: 1.5 }], 
+    justifyContent: 'center',
+    marginTop: 12,
+    width: '100%',
 },
 
 

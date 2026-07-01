@@ -7,46 +7,76 @@ import BotonIncremental from '../components/botonIncremental';
 import Checkbox from 'expo-checkbox';
 import { categorias } from '../data/categoriasLocal';
 import { getJugadoresGuardados, setJugadoresGuardados } from '../utils/jugadoresStore';
-import { useAuth } from '../context/AuthContext';
 
-export default function ConfigurarPartidaScreen({ navigation }) {
+export default function ConfigurarPartidaScreen({ navigation, route }) {
 
-    const { usuario } = useAuth();
+    const usuario = route.params?.usuario || null;
     const estaLogueado = usuario !== null;
 
-    console.log('ConfigurarPartida - Usuario:', usuario);
-    console.log('ConfigurarPartida - estaLogueado:', estaLogueado);
+    const API_URLS = [
+        'http://192.168.1.137:8088/api/v1',
+        'http://172.20.10.2:8088/api/v1',
+        'http://localhost:8088/api/v1',
+        'http://10.0.2.2:8088/api/v1',
+    ];
 
-    const API_URL = "http://172.20.10.2:8088/api/v1";
+    const fetchConFallback = async (ruta) => {
+        let ultimoError = null;
+
+        for (const API_URL of API_URLS) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
+
+                const response = await fetch(`${API_URL}${ruta}`, { 
+                    signal: controller.signal 
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    return response;
+                }
+
+                ultimoError = new Error(`HTTP ${response.status}`);
+            } catch (error) {
+                ultimoError = error;
+            }
+        }
+
+        throw ultimoError || new Error('No se pudo conectar con el servidor');
+    };
 
     const cargarCategoriasBackend = async () => {
+        console.log('Cargando categorías...');
+        const categoriasLocales = categorias.map((c) => ({
+            label: c.nombre,
+            value: `local_${c.id}`,
+            esLocal: true,
+        }));
+
+        console.log('Categorías locales:', categoriasLocales);
+        setItems(categoriasLocales);
+        setCategoriasBackend([]);
+
         try {
-            const response = await fetch(`${API_URL}/categoria/listarCategorias`);
-
-            if (!response.ok) {
-                throw new Error("Error al cargar categorías");
-            }
-
+            const response = await fetchConFallback('/categoria/listarCategorias');
             const data = await response.json();
 
             const nuevasItems = [
-                ...categorias.map((c) => ({
-                    label: c.nombre,
-                    value: `local_${c.id}`,
-                    esLocal: true
-                })),
+                ...categoriasLocales,
                 ...data.map((c) => ({
                     label: c.nombre,
                     value: `backend_${c.id}`,
-                    esLocal: false
+                    esLocal: false,
                 })),
             ];
 
             setItems(nuevasItems);
             setCategoriasBackend(data);
-
+            console.log('Categorías del backend cargadas:', data);
         } catch (error) {
-            alert("Error al cargar categorías: " + error.message);
+            console.warn('No se pudo cargar el backend de categorías. Se mostrarán las categorías locales.', error.message);
         }
     };
     const [palabra, setPalabra] = useState('');
@@ -61,6 +91,7 @@ export default function ConfigurarPartidaScreen({ navigation }) {
     );
     const [impostores, setImpostores] = useState(1);
     const [pista, setPista] = useState(false);
+    const [votacion, setVotacion] = useState(false);
     const [jugadores, setJugadores] = useState(() => {
         const lista = getJugadoresGuardados();
         if (usuario && lista.length > 0) {
@@ -89,8 +120,9 @@ export default function ConfigurarPartidaScreen({ navigation }) {
             alert('Se necesitan al menos 3 jugadores para jugar.');
             return;
         }
-        if (impostores >= jugadores.length) {
-            alert('La cantidad de impostores debe ser menor que la cantidad de jugadores.');
+        const maxImpostores = Math.max(1, Math.floor(jugadores.length / 2) - 1);
+        if (impostores > maxImpostores) {
+            alert(`La cantidad de impostores no puede superar ${maxImpostores} (${jugadores.length} jugadores / 2 - 1).`);
             return;
         }
 
@@ -98,28 +130,21 @@ export default function ConfigurarPartidaScreen({ navigation }) {
         let nombreCategoria;
 
         if (value.startsWith('local_')) {
-            // Categoría local (Películas)
             const idLocal = parseInt(value.replace('local_', ''));
             const categoriaSeleccionada = categorias.find((c) => c.id === idLocal);
+
             if (!categoriaSeleccionada || !categoriaSeleccionada.palabras?.length) {
                 alert('La categoría seleccionada no tiene palabras.');
                 return;
             }
-            const p = categoriaSeleccionada.palabras[
+
+            const palabraElegida = categoriaSeleccionada.palabras[
                 Math.floor(Math.random() * categoriaSeleccionada.palabras.length)
             ];
-            const responsePistas = await fetch(`${API_URL}/pista/palabra/${palabraElegida.id}`);
-
-            if (!responsePistas.ok) {
-                alert('No se pudieron cargar las pistas.');
-                return;
-            }
-
-            const pistas = await responsePistas.json();
 
             palabraAleatoria = {
-                palabra: palabraElegida.nombre,
-                pistas: pistas?.map((p) => p.nombre) || []
+                palabra: palabraElegida.palabra,
+                pistas: palabraElegida.pistas || []
             };
             nombreCategoria = categoriaSeleccionada.nombre;
 
@@ -128,7 +153,7 @@ export default function ConfigurarPartidaScreen({ navigation }) {
             const idCategoriaBackend = parseInt(value.replace('backend_', ''));
             nombreCategoria = categoriasBackend.find((c) => c.id === idCategoriaBackend)?.nombre;
 
-            const response = await fetch(`${API_URL}/categoria/${idCategoriaBackend}/palabras`);
+            const response = await fetchConFallback(`/categoria/${idCategoriaBackend}/palabras`);
 
             if (!response.ok) {
                 alert('No se pudieron cargar las palabras.');
@@ -144,7 +169,7 @@ export default function ConfigurarPartidaScreen({ navigation }) {
 
             const palabraElegida = palabras[Math.floor(Math.random() * palabras.length)];
 
-            const responsePistas = await fetch(`${API_URL}/pista/palabra/${palabraElegida.id}`);
+            const responsePistas = await fetchConFallback(`/pista/palabra/${palabraElegida.id}`);
 
             if (!responsePistas.ok) {
                 alert('No se pudieron cargar las pistas.');
@@ -184,6 +209,7 @@ export default function ConfigurarPartidaScreen({ navigation }) {
             palabra: palabraAleatoria.palabra,
             categoria: nombreCategoria,
             mostrarPista: pista,
+            votacion: votacion,
         });
     };
 
@@ -204,6 +230,13 @@ export default function ConfigurarPartidaScreen({ navigation }) {
                             <Text style={styles.textOpcion}>Pista</Text>
                             <View style={styles.controlesPista}>
                                 <Checkbox value={pista} onValueChange={setPista} />
+                            </View>
+                        </View>
+
+                        <View style={styles.cardOpcion}>
+                            <Text style={styles.textOpcion}>Votación</Text>
+                            <View style={styles.controlesPista}>
+                                <Checkbox value={votacion} onValueChange={setVotacion} />
                             </View>
                         </View>
 
@@ -229,6 +262,10 @@ export default function ConfigurarPartidaScreen({ navigation }) {
                             placeholder="Seleccionar categoría"
                             style={styles.dropdown}
                             textStyle={styles.dropdownText}
+                            listMode="SCROLLVIEW"
+                            dropDownDirection="BOTTOM"
+                            zIndex={3000}
+                            zIndexInverse={1000}
                         />
                     </View>
 
@@ -291,8 +328,12 @@ export default function ConfigurarPartidaScreen({ navigation }) {
                     </View>
 
                     <View style={styles.botonesFinales}>
-                        <Button title='Volver' onPress={() => navigation.goBack()} />
-                        <Button title='Iniciar Partida' onPress={iniciarPartida} />
+                        <View style={styles.botonFinalSecundario}>
+                            <Button title='Volver' color='#d9534f' onPress={() => navigation.goBack()} />
+                        </View>
+                        <View style={styles.botonFinal}>
+                            <Button title='Iniciar Partida' color='#06a837' onPress={iniciarPartida} />
+                        </View>
                     </View>
 
                     <View style={styles.footer}>
