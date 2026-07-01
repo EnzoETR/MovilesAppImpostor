@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Button } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
-import { supabase } from '../utils/supabase';
-import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase'; // Asegúrate de importar Supabase correctamente
 
-export default function IniciarSesionScreen({ navigation }) {
-  const { usuario: usuarioActivo, login: setUsuario, logout } = useAuth();
+export default function IniciarSesionScreen({ navigation, route }) {
+  
+  const usuarioActivo = route.params?.usuario || null;
 
   // Estados para el formulario
-  const [esRegistro, setEsRegistro] = useState(false); // Por defecto Iniciar Sesión
+  const [esRegistro, setEsRegistro] = useState(false);
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasenia, setContrasenia] = useState('');
@@ -68,10 +68,8 @@ export default function IniciarSesionScreen({ navigation }) {
     }
 
     alert(`¡Bienvenido de nuevo, ${data.nombre.toUpperCase()}!`);
-    // Guardamos el usuario en el contexto global
-    console.log('Guardando usuario en contexto:', data);
-    setUsuario(data);
-    navigation.navigate("Inicio");
+    // Enviamos el usuario de vuelta a la pantalla de Inicio
+    navigation.navigate("Inicio", { usuario: data });
   };
 
   // === EN CASO DE QUE YA ESTÉ LOGUEADO ===
@@ -91,15 +89,14 @@ export default function IniciarSesionScreen({ navigation }) {
             <Button 
               title="Volver al Menú" 
               color="#06a837" 
-              onPress={() => navigation.navigate("Inicio")} 
+              onPress={() => navigation.navigate("Inicio", { usuario: usuarioActivo })} 
             />
             <Button 
               title="Cerrar Sesión" 
               color="#d9534f" 
               onPress={() => {
                 alert("Sesión cerrada");
-                logout();
-                navigation.navigate("Inicio");
+                navigation.navigate("Inicio", { usuario: null });
               }} 
             />
           </View>
