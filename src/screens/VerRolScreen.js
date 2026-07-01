@@ -19,7 +19,7 @@ export default function VerRolScreen({ route, navigation }) {
             <View style={estilos.cardRol}>
                 {revelado ? (
                     <>
-                        <Text style={estilos.etiquetaRol}>Tu rol es:</Text>
+                        <Text style={estilos.etiquetaRol}>Tu palabra es:</Text>
                         <Text
                             style={[
                                 estilos.rol,
@@ -33,7 +33,7 @@ export default function VerRolScreen({ route, navigation }) {
                                 ¡Eres el impostor!
                             </Text>
                         )}
-                        {!esImpostor && mostrarPista && jugador.pista && (
+                        {esImpostor && mostrarPista && jugador.pista && (
                             <Text style={estilos.pista}>
                                 Pista: {jugador.pista}
                             </Text>

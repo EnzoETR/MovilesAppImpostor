@@ -10,6 +10,7 @@ export const styles = StyleSheet.create({
     paddingTop: 40,
     paddingBottom: 30,
     alignItems: 'center',
+    flexGrow: 1,
   },
 
   // Títulos

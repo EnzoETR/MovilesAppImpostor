@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Button } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
-import { supabase } from '../utils/supabase'; // Asegúrate de importar Supabase correctamente
+import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 
-export default function IniciarSesionScreen({ navigation, route }) {
-  // Capturamos el usuario si viene desde el Index
-  const usuarioActivo = route.params?.usuario || null;
+export default function IniciarSesionScreen({ navigation }) {
+  const { usuario: usuarioActivo, login: setUsuario, logout } = useAuth();
 
   // Estados para el formulario
   const [esRegistro, setEsRegistro] = useState(false); // Por defecto Iniciar Sesión
@@ -68,8 +68,10 @@ export default function IniciarSesionScreen({ navigation, route }) {
     }
 
     alert(`¡Bienvenido de nuevo, ${data.nombre.toUpperCase()}!`);
-    // Enviamos el usuario de vuelta a la pantalla de Inicio
-    navigation.navigate("Inicio", { usuario: data });
+    // Guardamos el usuario en el contexto global
+    console.log('Guardando usuario en contexto:', data);
+    setUsuario(data);
+    navigation.navigate("Inicio");
   };
 
   // === EN CASO DE QUE YA ESTÉ LOGUEADO ===
@@ -89,14 +91,15 @@ export default function IniciarSesionScreen({ navigation, route }) {
             <Button 
               title="Volver al Menú" 
               color="#06a837" 
-              onPress={() => navigation.navigate("Inicio", { usuario: usuarioActivo })} 
+              onPress={() => navigation.navigate("Inicio")} 
             />
             <Button 
               title="Cerrar Sesión" 
               color="#d9534f" 
               onPress={() => {
                 alert("Sesión cerrada");
-                navigation.navigate("Inicio", { usuario: null });
+                logout();
+                navigation.navigate("Inicio");
               }} 
             />
           </View>

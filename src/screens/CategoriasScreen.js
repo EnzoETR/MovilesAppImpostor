@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { styles } from '../styles/EstilosCategoriasReglas';
 import Footer from '../components/footer';
+import { useAuth } from '../context/AuthContext';
 
 const REGLAS = [
   'Cada jugador recibe un rol secreto.',
@@ -15,9 +16,12 @@ const REGLAS = [
   'Si el impostor sobrevive, gana él.',
 ];
 
-export default function CategoriasScreen({ navigation, route }) {
-  const usuario = route.params?.usuario || null;  // 👈 recibe el usuario
+export default function CategoriasScreen({ navigation }) {
+  const { usuario } = useAuth();
   const estaLogueado = usuario !== null;
+
+  console.log('CategoriasScreen - Usuario:', usuario);
+  console.log('CategoriasScreen - estaLogueado:', estaLogueado);
 
   const CATEGORIAS = [
   { id: 1, nombre: 'Videojuegos', disponible: estaLogueado },
@@ -27,6 +31,8 @@ export default function CategoriasScreen({ navigation, route }) {
   { id: 5, nombre: 'Músicos', disponible: estaLogueado },
   { id: 6, nombre: 'Películas', disponible: true }, // única disponible sin login
 ];
+
+  console.log('CATEGORIAS:', CATEGORIAS);
 
   const handleCategoria = (categoria) => {
     if (!categoria.disponible) {
@@ -46,7 +52,9 @@ export default function CategoriasScreen({ navigation, route }) {
         <Text style={styles.titulo}>Categorias y Reglas</Text>
         <Text style={styles.subtitulo}>Categorias</Text>
 
-        {CATEGORIAS.map((cat) => (
+        {CATEGORIAS.map((cat) => {
+          console.log('Renderizando categoría:', cat.nombre, 'disponible:', cat.disponible);
+          return (
           <TouchableOpacity
             key={cat.id}
             style={[styles.categoriaBtn, !cat.disponible && styles.categoriaBtnBloqueada]}
@@ -57,7 +65,8 @@ export default function CategoriasScreen({ navigation, route }) {
               {cat.nombre}
             </Text>
           </TouchableOpacity>
-        ))}
+          );
+        })}
 
         <TouchableOpacity
           style={styles.agregarBtn}

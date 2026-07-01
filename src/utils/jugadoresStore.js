@@ -2,8 +2,9 @@
 // entre partidas. Sobrevive mientras la app esté abierta.
 
 let jugadoresGuardados = [
-    { id: '1', nombre: 'Juan' },
-    { id: '2', nombre: 'Pedro' },
+    { id: '1', nombre: 'Jugador 1' },
+    { id: '2', nombre: 'Jugador 2' },
+    { id: '3', nombre: 'Jugador 3' },
 ];
 
 export const getJugadoresGuardados = () => jugadoresGuardados;

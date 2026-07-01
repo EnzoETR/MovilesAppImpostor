@@ -7,53 +7,78 @@ import BotonIncremental from '../components/botonIncremental';
 import Checkbox from 'expo-checkbox';
 import { categorias } from '../data/categoriasLocal';
 import { getJugadoresGuardados, setJugadoresGuardados } from '../utils/jugadoresStore';
-import { supabase } from '../utils/supabase'; // agregado
+import { useAuth } from '../context/AuthContext';
 
-export default function ConfigurarPartidaScreen({ navigation, route }) {
+export default function ConfigurarPartidaScreen({ navigation }) {
 
-    const usuario = route.params?.usuario || null; // recibe el usuario
+    const { usuario } = useAuth();
     const estaLogueado = usuario !== null;
 
+    console.log('ConfigurarPartida - Usuario:', usuario);
+    console.log('ConfigurarPartida - estaLogueado:', estaLogueado);
+
+    const API_URL = "http://172.20.10.2:8088/api/v1";
+
+    const cargarCategoriasBackend = async () => {
+        try {
+            const response = await fetch(`${API_URL}/categoria/listarCategorias`);
+
+            if (!response.ok) {
+                throw new Error("Error al cargar categorías");
+            }
+
+            const data = await response.json();
+
+            const nuevasItems = [
+                ...categorias.map((c) => ({
+                    label: c.nombre,
+                    value: `local_${c.id}`,
+                    esLocal: true
+                })),
+                ...data.map((c) => ({
+                    label: c.nombre,
+                    value: `backend_${c.id}`,
+                    esLocal: false
+                })),
+            ];
+
+            setItems(nuevasItems);
+            setCategoriasBackend(data);
+
+        } catch (error) {
+            alert("Error al cargar categorías: " + error.message);
+        }
+    };
     const [palabra, setPalabra] = useState('');
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [items, setItems] = useState(
         categorias.map((categoria) => ({
             label: categoria.nombre,
-            value: categoria.id,
-            esLocal: true, // marca que es local
+            value: `local_${categoria.id}`,
+            esLocal: true,
         }))
     );
     const [impostores, setImpostores] = useState(1);
     const [pista, setPista] = useState(false);
-    const [jugadores, setJugadores] = useState(getJugadoresGuardados());
-    const [categoriasSupabase, setCategoriasSupabase] = useState([]);
+    const [jugadores, setJugadores] = useState(() => {
+        const lista = getJugadoresGuardados();
+        if (usuario && lista.length > 0) {
+            lista[0] = {
+                ...lista[0],
+                nombre: usuario.nombre
+            };
+        }
+        return lista;
+    });
+    const [categoriasBackend, setCategoriasBackend] = useState([]);
 
-    //  Si está logueado, carga las categorías de Supabase
     useEffect(() => {
         if (estaLogueado) {
-            cargarCategoriasSupabase();
+            cargarCategoriasBackend();
         }
     }, [estaLogueado]);
 
-    const cargarCategoriasSupabase = async () => {
-        const { data, error } = await supabase
-            .from('categorias')
-            .select('*');
-
-        if (error) {
-            alert('Error al cargar categorías: ' + error.message);
-            return;
-        }
-
-        // Agregamos las categorías de Supabase al dropdown
-        const nuevasItems = [
-            ...categorias.map((c) => ({ label: c.nombre, value: `local_${c.id}`, esLocal: true })),
-            ...data.map((c) => ({ label: c.nombre, value: `supabase_${c.id}`, esLocal: false })),
-        ];
-        setItems(nuevasItems);
-        setCategoriasSupabase(data);
-    };
 
     const iniciarPartida = async () => {
         if (!value) {
@@ -83,37 +108,54 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
             const p = categoriaSeleccionada.palabras[
                 Math.floor(Math.random() * categoriaSeleccionada.palabras.length)
             ];
-            palabraAleatoria = { palabra: p.palabra, pistas: p.pistas };
+            const responsePistas = await fetch(`${API_URL}/pista/palabra/${palabraElegida.id}`);
+
+            if (!responsePistas.ok) {
+                alert('No se pudieron cargar las pistas.');
+                return;
+            }
+
+            const pistas = await responsePistas.json();
+
+            palabraAleatoria = {
+                palabra: palabraElegida.nombre,
+                pistas: pistas?.map((p) => p.nombre) || []
+            };
             nombreCategoria = categoriaSeleccionada.nombre;
 
         } else {
-            //  Categoría de Supabase
-            const idSupabase = parseInt(value.replace('supabase_', ''));
-            nombreCategoria = categoriasSupabase.find((c) => c.id === idSupabase)?.nombre;
 
-            // Traer palabras de esa categoría
-            const { data: palabras, error } = await supabase
-                .from('palabras')
-                .select('*')
-                .eq('id_categoria', idSupabase);
+            const idCategoriaBackend = parseInt(value.replace('backend_', ''));
+            nombreCategoria = categoriasBackend.find((c) => c.id === idCategoriaBackend)?.nombre;
 
-            if (error || !palabras?.length) {
+            const response = await fetch(`${API_URL}/categoria/${idCategoriaBackend}/palabras`);
+
+            if (!response.ok) {
                 alert('No se pudieron cargar las palabras.');
                 return;
             }
 
-            // Elegir palabra aleatoria
+            const palabras = await response.json();
+
+            if (!palabras?.length) {
+                alert('La categoría seleccionada no tiene palabras.');
+                return;
+            }
+
             const palabraElegida = palabras[Math.floor(Math.random() * palabras.length)];
 
-            // Traer pistas de esa palabra
-            const { data: pistas } = await supabase
-                .from('pista')
-                .select('*')
-                .eq('id_palabra', palabraElegida.id);
+            const responsePistas = await fetch(`${API_URL}/pista/palabra/${palabraElegida.id}`);
+
+            if (!responsePistas.ok) {
+                alert('No se pudieron cargar las pistas.');
+                return;
+            }
+
+            const pistas = await responsePistas.json();
 
             palabraAleatoria = {
                 palabra: palabraElegida.nombre,
-                pistas: pistas?.map((p) => p.nombre) || [],
+                pistas: pistas?.map((p) => p.nombre) || []
             };
         }
 
@@ -145,11 +187,12 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
         });
     };
 
+
     return (
         <FlatList
             style={styles.container}
             data={[]}
-            renderItem={null} // Agregado para buena práctica al usar data={[]}
+            renderItem={null}
             ListHeaderComponent={
                 <>
                     <View style={styles.header}>
