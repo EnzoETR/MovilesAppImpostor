@@ -14,4 +14,18 @@ export const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '600',
     },
+    contenedorBotonIncremental: {
+        backgroundColor: '#8ec4a5',
+        width: 28,
+        height: 28,
+        borderRadius: 4,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    masmenos: {
+        color: '#075c35',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+
 });
