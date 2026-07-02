@@ -165,17 +165,18 @@ controlesImpostores: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
-    gap: 10,
+    marginTop: 6,
+    gap: 8,
     width: '100%',
 },
 
 numeroImpostores: {
     color: '#ffffff',
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    minWidth: 28,
+    minWidth: 22,
     textAlign: 'center',
+    lineHeight: 20,
 },
 
 controlesPista: {

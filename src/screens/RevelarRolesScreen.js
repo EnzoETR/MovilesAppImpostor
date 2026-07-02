@@ -3,7 +3,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function RevelarRolesScreen({ route, navigation }) {
-    const { jugadores = [], palabra, categoria, mostrarPista, votacion } = route.params || {};
+    const { jugadores = [], palabra, categoria, mostrarPista, votacion, usuario } = route.params || {};
 
     const [vistos, setVistos] = useState([]);
 
@@ -76,7 +76,7 @@ export default function RevelarRolesScreen({ route, navigation }) {
 
                 <TouchableOpacity
                     style={estilos.botonSecundario}
-                    onPress={() => navigation.navigate('Inicio', { usuario: route.params?.usuario || null })}
+                    onPress={() => navigation.navigate('Inicio', { usuario })}
                 >
                     <Text style={estilos.botonSecundarioTexto}>Volver al inicio</Text>
                 </TouchableOpacity>
@@ -124,6 +124,7 @@ export default function RevelarRolesScreen({ route, navigation }) {
                                 jugadores,
                                 palabra,
                                 categoria,
+                                usuario,
                             })}
                         >
                             <Text style={estilos.botonPrimarioTexto}>Ir a Votación</Text>

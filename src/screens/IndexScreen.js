@@ -5,17 +5,61 @@ import BotonInicio from '../components/boton_inicio';
 import Footer from '../components/footer';
 import ImagenPrinicipal from '../../assets/imagenes/ImpostorImagenPrincipal.png';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getPartidasGuardadas } from '../utils/partidasStore';
 
-export default function IndexScreen({ navigation, route }) {
-    // Estado local para mantener al usuario sincronizado
-    const [usuario, setUsuario] = useState(route.params?.usuario || null);
+export default function IndexScreen({ navigation }) {
+    const { usuario } = useAuth();
 
-    // Este efecto escucha cada vez que la pantalla vuelve a estar en primer plano (focus)
+    const [totalPartidas, setTotalPartidas] = useState(0);
+    const [victoriasCiviles, setVictoriasCiviles] = useState(0);
+    const [victoriasImpostores, setVictoriasImpostores] = useState(0);
+
+    const API_URL = 'http://192.168.1.137:8088/api/v1';
+
     useEffect(() => {
-        if (route.params?.usuario !== undefined) {
-            setUsuario(route.params.usuario);
+        if (usuario) {
+            cargarEstadisticas();
+        } else {
+            setTotalPartidas(0);
+            setVictoriasCiviles(0);
+            setVictoriasImpostores(0);
         }
-    }, [route.params?.usuario]);
+    }, [usuario]);
+
+    const cargarEstadisticas = async () => {
+        try {
+            const response = await fetch(`${API_URL}/partida/listarPartidas`);
+
+            if (!response.ok) {
+                throw new Error('Error al obtener partidas');
+            }
+
+            const partidas = await response.json();
+            const partidasUsuario = (Array.isArray(partidas) ? partidas : []).filter(
+                partida => String(partida.idUsuario) === String(usuario.id)
+            );
+
+            const total = partidasUsuario.length;
+            const civiles = partidasUsuario.filter(partida => partida.ganoImpostor === false).length;
+            const impostores = partidasUsuario.filter(partida => partida.ganoImpostor === true).length;
+
+            setTotalPartidas(total);
+            setVictoriasCiviles(civiles);
+            setVictoriasImpostores(impostores);
+        } catch (error) {
+            console.log('Error cargando estadísticas del backend, usando respaldo local:', error);
+
+            const partidasLocales = await getPartidasGuardadas();
+            const partidasUsuario = partidasLocales.filter(
+                partida => String(partida.idUsuario) === String(usuario.id)
+            );
+
+            setTotalPartidas(partidasUsuario.length);
+            setVictoriasCiviles(partidasUsuario.filter(partida => partida.ganoImpostor === false).length);
+            setVictoriasImpostores(partidasUsuario.filter(partida => partida.ganoImpostor === true).length);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -23,27 +67,44 @@ export default function IndexScreen({ navigation, route }) {
                 source={ImagenPrinicipal}
                 style={styles.imagenPrincipal}
             />
+
             <View style={styles.contenedorFichasEstadisticas}>
-                <FichaEstadistica titulo="PARTIDAS" valor="20" imagen="mando.png"/>
-                <FichaEstadistica titulo="VICTORIAS" valor="10" imagen="victoria.png"/>
-                <FichaEstadistica titulo="IMPOSTOR" valor="5" imagen="impostor.png"/>
+                <FichaEstadistica 
+                    titulo="PARTIDAS" 
+                    valor={usuario ? String(totalPartidas) : "0"} 
+                    imagen="mando.png"
+                />
+
+                <FichaEstadistica 
+                    titulo="CIVILES" 
+                    valor={usuario ? String(victoriasCiviles) : "0"} 
+                    imagen="victoria.png"
+                />
+
+                <FichaEstadistica 
+                    titulo="IMPOSTOR" 
+                    valor={usuario ? String(victoriasImpostores) : "0"} 
+                    imagen="impostor.png"
+                />
             </View>
+
             <View style={styles.contenedorBotonesIncio}>
                 <BotonInicio
-                  title="Crear Partida"
-                  onPress={() => navigation.navigate("ConfigurarPartida", { usuario })}
+                    title="Crear Partida"
+                    onPress={() => navigation.navigate("ConfigurarPartida", { usuario })}
                 />
-                {/* Botón 2: Categorías y Reglas */}
+
                 <BotonInicio
-                  title="Categorías y Reglas"
-                   onPress={() => navigation.navigate("Categorias", { usuario })}
+                    title="Categorías y Reglas"
+                    onPress={() => navigation.navigate("Categorias", { usuario })}
                 />
-                {/* Botón 3: Iniciar Sesión / Ver Perfil */}
+
                 <BotonInicio
-                  title={usuario ? `Perfil: ${usuario.nombre}` : "Iniciar Sesión"}
-                  onPress={() => navigation.navigate("IniciarSesion", { usuario })}
+                    title={usuario ? `Perfil: ${usuario.nombre}` : "Iniciar Sesión"}
+                    onPress={() => navigation.navigate("IniciarSesion", { usuario })}
                 />
             </View>
+
             <View style={styles.contenedorFooter}>
                 <Footer />
             </View>

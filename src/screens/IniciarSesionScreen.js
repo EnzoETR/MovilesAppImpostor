@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Text, View, TouchableOpacity, TextInput, KeyboardAvoidingView, ScrollView, Platform, Button } from 'react-native';
 import { styles } from '../styles/EstilosI-Sesion';
 import Footer from '../components/footer';
-import { supabase } from '../utils/supabase'; // Asegúrate de importar Supabase correctamente
+import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 
-export default function IniciarSesionScreen({ navigation, route }) {
-  
-  const usuarioActivo = route.params?.usuario || null;
+export default function IniciarSesionScreen({ navigation }) {
+  const { usuario: usuarioActivo, login, logout } = useAuth();
 
   // Estados para el formulario
   const [esRegistro, setEsRegistro] = useState(false);
@@ -68,8 +68,8 @@ export default function IniciarSesionScreen({ navigation, route }) {
     }
 
     alert(`¡Bienvenido de nuevo, ${data.nombre.toUpperCase()}!`);
-    // Enviamos el usuario de vuelta a la pantalla de Inicio
-    navigation.navigate("Inicio", { usuario: data });
+    login(data);
+    navigation.replace("Inicio");
   };
 
   // === EN CASO DE QUE YA ESTÉ LOGUEADO ===
@@ -89,14 +89,15 @@ export default function IniciarSesionScreen({ navigation, route }) {
             <Button 
               title="Volver al Menú" 
               color="#06a837" 
-              onPress={() => navigation.navigate("Inicio", { usuario: usuarioActivo })} 
+              onPress={() => navigation.replace("Inicio")} 
             />
             <Button 
               title="Cerrar Sesión" 
               color="#d9534f" 
               onPress={() => {
+                logout();
                 alert("Sesión cerrada");
-                navigation.navigate("Inicio", { usuario: null });
+                navigation.replace("Inicio");
               }} 
             />
           </View>
@@ -176,7 +177,7 @@ export default function IniciarSesionScreen({ navigation, route }) {
               style={styles.input}
               value={contrasenia}
               onChangeText={setContrasenia}
-              secureTextEntry={true}
+              secureTextEntry={false}
               placeholder="Ingresa tu contraseña"
               placeholderTextColor="#4E7A43"
             />
@@ -191,7 +192,7 @@ export default function IniciarSesionScreen({ navigation, route }) {
                   style={styles.input}
                   value={repetirContrasenia}
                   onChangeText={setRepetirContrasenia}
-                  secureTextEntry={true}
+                  secureTextEntry={false}
                   placeholder="Repite tu contraseña"
                   placeholderTextColor="#4E7A43"
                 />

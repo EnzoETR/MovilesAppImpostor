@@ -7,10 +7,11 @@ import BotonIncremental from '../components/botonIncremental';
 import Checkbox from 'expo-checkbox';
 import { categorias } from '../data/categoriasLocal';
 import { getJugadoresGuardados, setJugadoresGuardados } from '../utils/jugadoresStore';
+import { useAuth } from '../context/AuthContext';
 
-export default function ConfigurarPartidaScreen({ navigation, route }) {
+export default function ConfigurarPartidaScreen({ navigation }) {
 
-    const usuario = route.params?.usuario || null;
+    const { usuario } = useAuth();
     const estaLogueado = usuario !== null;
 
     const API_URLS = [
@@ -28,10 +29,10 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 segundos timeout
 
-                const response = await fetch(`${API_URL}${ruta}`, { 
-                    signal: controller.signal 
+                const response = await fetch(`${API_URL}${ruta}`, {
+                    signal: controller.signal
                 });
-                
+
                 clearTimeout(timeoutId);
 
                 if (response.ok) {
@@ -210,6 +211,7 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
             categoria: nombreCategoria,
             mostrarPista: pista,
             votacion: votacion,
+            usuario: usuario,
         });
     };
 
@@ -241,7 +243,7 @@ export default function ConfigurarPartidaScreen({ navigation, route }) {
                         </View>
 
                         <View style={styles.cardOpcion}>
-                            <Text style={styles.textOpcion}>Impostores</Text>
+                            <Text style={styles.textOpcion}>Impostor</Text>
                             <View style={styles.controlesImpostores}>
                                 <BotonIncremental title='-' onPress={() => setImpostores(Math.max(1, impostores - 1))} />
                                 <Text style={styles.numeroImpostores}>{impostores}</Text>

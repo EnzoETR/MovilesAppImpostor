@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { styles } from '../styles/EstilosCategoriasReglas';
 import Footer from '../components/footer';
+import { useAuth } from '../context/AuthContext';
 
 const REGLAS = [
   'Cada jugador recibe un rol secreto.',
@@ -15,8 +16,8 @@ const REGLAS = [
   'Si el impostor sobrevive, gana él.',
 ];
 
-export default function CategoriasScreen({ navigation, route }) {
-  const usuario = route.params?.usuario || null;
+export default function CategoriasScreen({ navigation }) {
+  const { usuario } = useAuth();
   const estaLogueado = usuario !== null;
 
   const CATEGORIAS = [

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { guardarPartidaLocal } from '../utils/partidasStore';
 
 export default function VotacionScreen({ route, navigation }) {
-    const { jugadores, palabra, categoria } = route.params || {};
-    
+    const { jugadores, palabra, categoria, usuario } = route.params || {};
+
     const [votos, setVotos] = useState({});
     const [jugadorActual, setJugadorActual] = useState(0);
     const [votacionFinalizada, setVotacionFinalizada] = useState(false);
@@ -12,6 +13,7 @@ export default function VotacionScreen({ route, navigation }) {
 
     const jugadoresActivos = jugadores.filter(j => !j.eliminado);
 
+    const API_URL = 'http://192.168.1.137:8088/api/v1';
     const handleVoto = (votadoId) => {
         const votante = jugadoresActivos[jugadorActual];
         setVotos(prev => ({
@@ -20,7 +22,50 @@ export default function VotacionScreen({ route, navigation }) {
         }));
         setJugadorActual(prev => prev + 1);
     };
+    const crearPartida = async (ganoImpostor) => {
+        try {
+            if (!usuario || !usuario.id) {
+                console.log("Usuario recibido:", usuario);
+                Alert.alert('Error', 'No hay un usuario logueado para guardar la partida.');
+                return;
+            }
 
+            const partida = {
+                ganoImpostor: ganoImpostor,
+                idUsuario: usuario.id
+            };
+
+            console.log("Partida enviada:", partida);
+
+            const response = await fetch(`${API_URL}/partida/crearPartida`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(partida),
+            });
+
+            console.log("Status crear partida:", response.status);
+
+            if (!response.ok) {
+                const errorTexto = await response.text();
+                console.log("Error backend:", errorTexto);
+                throw new Error('Error al crear la partida');
+            }
+
+            const data = await response.json();
+            console.log('Partida creada:', data);
+
+        } catch (error) {
+            console.log('Error creando partida en backend, guardando localmente:', error);
+            await guardarPartidaLocal({
+                ganoImpostor,
+                idUsuario: usuario.id,
+                nombreUsuario: usuario.nombre,
+            });
+            Alert.alert('Info', 'La partida se guardó localmente porque el servidor no respondió correctamente.');
+        }
+    };
     const finalizarVotacion = () => {
         // Contar votos
         const conteo = {};
@@ -47,12 +92,12 @@ export default function VotacionScreen({ route, navigation }) {
             // Hay un ganador
             const eliminadoId = candidatos[0];
             const jugadorEliminado = jugadores.find(j => String(j.id) === String(eliminadoId));
-            
+
             if (!jugadorEliminado) {
                 Alert.alert('Error', 'No se encontró el jugador eliminado.');
                 return;
             }
-            
+
             setEliminado(jugadorEliminado);
             setVotacionFinalizada(true);
         }
@@ -66,17 +111,17 @@ export default function VotacionScreen({ route, navigation }) {
         setEmpate(false);
     };
 
-    const continuarJuego = () => {
-        // Marcar al jugador como eliminado
-        const jugadoresActualizados = jugadores.map(j => 
+    const continuarJuego = async () => {
+        const jugadoresActualizados = jugadores.map(j =>
             j.id === eliminado.id ? { ...j, eliminado: true } : j
         );
 
-        // Verificar condiciones de victoria
         const impostoresVivos = jugadoresActualizados.filter(j => j.esImpostor && !j.eliminado).length;
         const civilesVivos = jugadoresActualizados.filter(j => !j.esImpostor && !j.eliminado).length;
 
         if (impostoresVivos === 0) {
+            await crearPartida(false);
+
             Alert.alert('¡Ganaron los civiles!', 'Todos los impostores fueron eliminados.', [
                 { text: 'OK', onPress: () => navigation.popToTop() }
             ]);
@@ -84,17 +129,19 @@ export default function VotacionScreen({ route, navigation }) {
         }
 
         if (impostoresVivos >= civilesVivos) {
+            await crearPartida(true);
+
             Alert.alert('¡Ganaron los impostores!', 'Los impostores superaron en número a los civiles.', [
                 { text: 'OK', onPress: () => navigation.popToTop() }
             ]);
             return;
         }
 
-        // Continuar con otra ronda de votación (sin revelar roles de nuevo)
         navigation.replace('Votacion', {
             jugadores: jugadoresActualizados,
             palabra,
             categoria,
+            usuario,
         });
     };
 
@@ -104,7 +151,7 @@ export default function VotacionScreen({ route, navigation }) {
                 <Text style={estilos.titulo}>¡Empate!</Text>
                 <Text style={estilos.subtitulo}>Hubo un empate en la votación.</Text>
                 <Text style={estilos.mensaje}>Deben volver a votar.</Text>
-                
+
                 <TouchableOpacity style={estilos.boton} onPress={reiniciarVotacion}>
                     <Text style={estilos.botonTexto}>Volver a Votar</Text>
                 </TouchableOpacity>
@@ -123,7 +170,7 @@ export default function VotacionScreen({ route, navigation }) {
                         {eliminado.esImpostor ? '🕵️ IMPOSTOR' : `👤 ${eliminado.rol}`}
                     </Text>
                 </View>
-                
+
                 <TouchableOpacity style={estilos.boton} onPress={continuarJuego}>
                     <Text style={estilos.botonTexto}>Continuar Juego</Text>
                 </TouchableOpacity>
@@ -136,7 +183,7 @@ export default function VotacionScreen({ route, navigation }) {
             <View style={estilos.container}>
                 <Text style={estilos.titulo}>Votación</Text>
                 <Text style={estilos.subtitulo}>Todos los jugadores han votado.</Text>
-                
+
                 <ScrollView style={estilos.lista}>
                     {jugadoresActivos.map(jugador => {
                         const votadoId = votos[jugador.id];
@@ -150,7 +197,7 @@ export default function VotacionScreen({ route, navigation }) {
                         );
                     })}
                 </ScrollView>
-                
+
                 <TouchableOpacity style={estilos.boton} onPress={finalizarVotacion}>
                     <Text style={estilos.botonTexto}>Finalizar Votación</Text>
                 </TouchableOpacity>
@@ -174,14 +221,14 @@ export default function VotacionScreen({ route, navigation }) {
                 {jugadoresActivos
                     .filter(j => j.id !== votante.id)
                     .map(jugador => (
-                    <TouchableOpacity
-                        key={jugador.id}
-                        style={estilos.jugadorCard}
-                        onPress={() => handleVoto(jugador.id)}
-                    >
-                        <Text style={estilos.jugadorNombre}>{jugador.nombre}</Text>
-                    </TouchableOpacity>
-                ))}
+                        <TouchableOpacity
+                            key={jugador.id}
+                            style={estilos.jugadorCard}
+                            onPress={() => handleVoto(jugador.id)}
+                        >
+                            <Text style={estilos.jugadorNombre}>{jugador.nombre}</Text>
+                        </TouchableOpacity>
+                    ))}
             </ScrollView>
         </View>
     );
